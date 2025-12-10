@@ -1,974 +1,1420 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>光與暗人格測驗｜Darklight Personality Test</title>
+  <meta charset="UTF-8" />
+  <title>暗光心測 · 代表人物測驗</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #050511;
+      --card-bg: #101322;
+      --card-soft: #181c2b;
+      --accent: #f8b4ff;
+      --accent-soft: rgba(248, 180, 255, 0.15);
+      --text-main: #f5f5ff;
+      --text-sub: #c5c7e1;
+      --danger: #ff6b81;
+      --safe: #7dd3fc;
+      --border-soft: #2b3045;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.55);
+    }
 
-<!-- 字體 -->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-<style>
     body {
-        margin: 0;
-        font-family: 'Noto Sans TC', sans-serif;
-        background: linear-gradient(120deg, #1d1d1f, #3a3a3d);
-        color: white;
-        text-align: center;
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Noto Sans TC", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1a1630 0, #050511 60%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
     }
 
-    /* 音樂切換按鈕 */
-    #musicToggle {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(6px);
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 22px;
-        z-index: 9999;
-        transition: 0.3s;
+    .app {
+      width: 100%;
+      max-width: 900px;
+      background: linear-gradient(145deg, #090b16 0, #080812 50%, #05040b 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    #musicToggle:hover {
-        background: rgba(255,255,255,0.35);
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px 4px;
     }
 
-    /* 開始頁面 */
-    #startScreen {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        padding: 20px;
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    #startScreen h1 {
-        font-size: 36px;
-        margin-bottom: 15px;
+    .title-main {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
     }
 
-    #startBtn {
-        margin-top: 30px;
-        padding: 15px 40px;
-        font-size: 20px;
-        border: none;
-        border-radius: 10px;
-        background: #ffdd66;
-        color: black;
-        cursor: pointer;
-        transition: 0.3s;
+    .title-sub {
+      font-size: 12px;
+      color: var(--text-sub);
     }
 
-    #startBtn:hover {
-        background: #ffe694;
+    .music-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      padding: 6px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-sub);
+      background: radial-gradient(circle at top left, #2b1937 0, #101322 60%);
+      cursor: pointer;
+      outline: none;
     }
 
-</style>
+    .music-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #f97373;
+      box-shadow: 0 0 8px rgba(248, 113, 113, 0.9);
+    }
+
+    .music-btn.playing .music-dot {
+      background: #4ade80;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.9);
+    }
+
+    .music-btn span {
+      white-space: nowrap;
+    }
+
+    .page {
+      display: none;
+      border-radius: 20px;
+      border: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top, rgba(148, 163, 253, 0.16), transparent 55%),
+        linear-gradient(160deg, #0b0e1a 0, #080812 40%, #05040b 100%);
+      padding: 18px 16px 18px;
+      min-height: 260px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .intro-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .intro-tagline {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 14px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 253, 0.5);
+      color: #c7d2fe;
+      background: radial-gradient(circle at top, rgba(129, 140, 248, 0.4), transparent);
+    }
+
+    .intro-block {
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: rgba(12, 16, 42, 0.9);
+      border: 1px solid var(--border-soft);
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.5;
+    }
+
+    .start-btn,
+    .next-btn,
+    .restart-btn {
+      margin-top: 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: #050816;
+      background: linear-gradient(135deg, #f9a8ff 0, #a855f7 35%, #38bdf8 100%);
+      box-shadow: 0 12px 30px rgba(56, 189, 248, 0.45);
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, #fda4af 0, #fb7185 40%, #fb923c 100%);
+      color: #0b0610;
+      box-shadow: 0 10px 26px rgba(248, 113, 113, 0.45);
+    }
+
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: var(--text-sub);
+      gap: 10px;
+    }
+
+    .progress-outer {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(30, 64, 175, 0.4);
+      overflow: hidden;
+    }
+
+    .progress-inner {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #38bdf8, #a855f7, #f97373);
+      width: 0%;
+      transition: width 0.25s ease-out;
+    }
+
+    .question-text {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .question-desc {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      width: 100%;
+      text-align: left;
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
+      padding: 10px 11px;
+      background: linear-gradient(145deg, #0b0f1e 0, #050712 60%);
+      color: var(--text-main);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .option-btn:hover {
+      border-color: rgba(148, 163, 253, 0.9);
+      box-shadow: 0 0 0 1px rgba(148, 163, 253, 0.35);
+    }
+
+    .option-main {
+      flex: 1;
+    }
+
+    .option-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 253, 0.6);
+      color: #c7d2fe;
+      white-space: nowrap;
+    }
+
+    .results-header {
+      margin-bottom: 10px;
+    }
+
+    .rep-label {
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rep-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .rep-type {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+    }
+
+    .rep-match {
+      font-size: 12px;
+      color: #fbbf24;
+      margin-bottom: 8px;
+    }
+
+    .rep-tagline {
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .rep-desc {
+      font-size: 13px;
+      color: var(--text-sub);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+
+    .bar-label {
+      width: 60px;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(30, 64, 175, 0.4);
+      overflow: hidden;
+    }
+
+    .bar-fill-dark {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #4b5563, #111827);
+      transition: width 0.3s ease-out;
+    }
+
+    .bar-fill-light {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #f9a8ff);
+      transition: width 0.3s ease-out;
+    }
+
+    .inner-state {
+      font-size: 12px;
+      color: var(--text-sub);
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-soft);
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 10px 0 6px;
+    }
+
+    .char-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .char-card {
+      border-radius: 12px;
+      padding: 8px 10px;
+      background: rgba(9, 11, 26, 0.95);
+      border: 1px solid var(--border-soft);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .char-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .char-name {
+      font-weight: 600;
+    }
+
+    .char-type {
+      color: var(--text-sub);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .char-scores {
+      color: #e5e7eb;
+    }
+
+    .char-summary {
+      color: var(--text-sub);
+      font-size: 11px;
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        padding: 14px 12px 16px;
+        border-radius: 18px;
+      }
+      .page {
+        padding: 14px 12px 14px;
+      }
+      .question-text {
+        font-size: 15px;
+      }
+      .option-btn {
+        padding: 9px 9px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<!-- 🔊 右上角音樂按鈕 -->
-<div id="musicToggle">🔊</div>
-
-<!-- 🎵 背景音樂（自動播放） -->
-<audio id="bgm" src="darklight.mp3" autoplay loop></audio>
-
-<!-- 🌓 開始畫面 -->
-<div id="startScreen">
-    <h1>光與暗人格測驗</h1>
-    <p>11 位角色 × MBTI × 黑暗 / 陽光百分比 × 魅力適配度</p>
-    <button id="startBtn">開始測驗</button>
-</div>
-
-<script>
-    // ------- 音樂控制 -------
-    const bgm = document.getElementById("bgm");
-    const toggleBtn = document.getElementById("musicToggle");
-    let isPlaying = true;
-
-    toggleBtn.addEventListener("click", () => {
-        if (isPlaying) {
-            bgm.pause();
-            toggleBtn.textContent = "🔈";
-        } else {
-            bgm.play().catch(()=>{});
-            toggleBtn.textContent = "🔊";
-        }
-        isPlaying = !isPlaying;
-    });
-
-    // ------- 開始測驗按鈕 -------
-    document.getElementById("startBtn").addEventListener("click", () => {
-        startScreen.style.display = "none";
-        loadQuiz();
-    });
-</script>
-<!-- ===== 測驗主要畫面樣式 ===== -->
-<style>
-  .app {
-    width: min(960px, 96vw);
-    background: rgba(10, 12, 24, 0.96);
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    padding: 24px 26px 26px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin: 32px auto 40px;
-  }
-
-  .label {
-    font-size: 12px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: #7ea7ff;
-  }
-
-  h2 {
-    font-size: 24px;
-    line-height: 1.3;
-    margin-top: 4px;
-    margin-bottom: 4px;
-  }
-
-  #subtitle {
-    font-size: 14px;
-    color: #c4c8de;
-  }
-
-  #question-area {
-    margin-top: 10px;
-    padding: 14px 14px 12px;
-    border-radius: 14px;
-    background: radial-gradient(circle at top left, rgba(126,167,255,0.16), rgba(10,12,24,0.7));
-    border: 1px solid rgba(126, 167, 255, 0.28);
-  }
-
-  #progress {
-    font-size: 12px;
-    color: #a6abd4;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  #question-text {
-    font-size: 15px;
-    line-height: 1.7;
-    margin-bottom: 10px;
-    color: #f0f2ff;
-    text-align: left;
-  }
-
-  .choices {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .choice-btn {
-    text-align: left;
-    border-radius: 999px;
-    border: 1px solid rgba(126, 167, 255, 0.6);
-    background: rgba(23, 33, 68, 0.9);
-    color: #f3f4ff;
-    padding: 9px 14px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.16s ease-out;
-    backdrop-filter: blur(8px);
-    line-height: 1.5;
-  }
-
-  .choice-btn:hover {
-    background: #7ea7ff;
-    color: #050814;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(126, 167, 255, 0.45);
-  }
-
-  #results {
-    margin-top: 10px;
-    display: none;
-    padding-top: 6px;
-    border-top: 1px dashed rgba(152, 159, 210, 0.6);
-  }
-
-  .result-section-title {
-    font-size: 14px;
-    margin-top: 14px;
-    margin-bottom: 4px;
-    color: #d6d9ff;
-    font-weight: 600;
-    text-align: left;
-  }
-
-  .bar-container {
-    margin-top: 6px;
-    width: 100%;
-    background: rgba(23, 25, 52, 0.8);
-    border-radius: 999px;
-    overflow: hidden;
-    border: 1px solid rgba(134, 141, 210, 0.6);
-    height: 14px;
-    display: flex;
-  }
-
-  .bar-dark {
-    height: 100%;
-    background: linear-gradient(90deg, #9b5bff, #ff6b9c);
-    transition: width 0.4s ease-out;
-  }
-
-  .bar-light {
-    height: 100%;
-    background: linear-gradient(90deg, #7ee8fa, #7ea7ff);
-    transition: width 0.4s ease-out;
-  }
-
-  .bar-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin-top: 4px;
-    color: #b6bbec;
-  }
-
-  #inner-state {
-    margin-top: 6px;
-    font-size: 14px;
-    line-height: 1.7;
-    color: #e0e3ff;
-    white-space: pre-line;
-    text-align: left;
-  }
-
-  .char-list {
-    margin-top: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 260px;
-    overflow-y: auto;
-    padding-right: 4px;
-  }
-
-  .char-card {
-    padding: 8px 10px;
-    border-radius: 12px;
-    background: rgba(15, 18, 40, 0.92);
-    border: 1px solid rgba(110, 120, 196, 0.7);
-    text-align: left;
-  }
-
-  .char-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 4px;
-  }
-
-  .char-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #f5f3ff;
-  }
-
-  .char-type {
-    font-size: 11px;
-    color: #a8aedf;
-  }
-
-  .char-scores {
-    font-size: 12px;
-    color: #d3d6ff;
-    margin-bottom: 4px;
-  }
-
-  .char-summary {
-    font-size: 12px;
-    color: #c0c4f0;
-    line-height: 1.6;
-  }
-
-  .meta {
-    margin-top: 10px;
-    font-size: 11px;
-    color: #8287a7;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .badge {
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(130, 135, 167, 0.6);
-  }
-
-  /* 代表人物區塊 */
-  #rep-section {
-    padding: 10px 12px 12px;
-    border-radius: 14px;
-    background: radial-gradient(circle at top left, rgba(255,255,255,0.08), rgba(15,18,40,0.96));
-    border: 1px solid rgba(190, 196, 255, 0.6);
-    margin-bottom: 8px;
-    text-align: left;
-  }
-
-  .rep-label {
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: #7ea7ff;
-    margin-bottom: 4px;
-  }
-
-  .rep-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fdfbff;
-  }
-
-  .rep-type-line {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 2px;
-    margin-bottom: 4px;
-    flex-wrap: wrap;
-  }
-
-  .rep-type {
-    font-size: 13px;
-    color: #c6caf9;
-  }
-
-  .rep-tagline {
-    font-size: 13px;
-    color: #ffb6e1;
-    margin-top: 4px;
-  }
-
-  .rep-desc {
-    margin-top: 6px;
-    font-size: 13px;
-    line-height: 1.8;
-    color: #dde0ff;
-    white-space: pre-line;
-  }
-
-  #restart-btn {
-    margin-top: 12px;
-    align-self: flex-start;
-    padding: 9px 18px;
-    border-radius: 999px;
-    border: none;
-    background: linear-gradient(135deg, #ff6b9c, #ffb86b);
-    color: #1a1020;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(255, 87, 125, 0.55);
-    transition: 0.18s ease-out;
-  }
-
-  #restart-btn:hover {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 12px 26px rgba(255, 87, 125, 0.75);
-  }
-
-  @media (max-width: 720px) {
-    .app {
-      padding: 18px 16px 18px;
-    }
-    h2 {
-      font-size: 20px;
-    }
-    #question-text {
-      font-size: 14px;
-    }
-    .choice-btn {
-      font-size: 13px;
-    }
-    .rep-name {
-      font-size: 16px;
-    }
-    .rep-desc {
-      font-size: 12px;
-    }
-  }
-</style>
-
-<!-- ===== 測驗主要畫面 HTML ===== -->
-<div id="quizApp" class="app" style="display:none;">
-  <div class="label">INTERACTIVE PERSONALITY QUIZ</div>
-  <h2>黑暗面 vs 陽光面｜角色相性心理測驗</h2>
-  <p id="subtitle">透過 20 題情境選擇，看看你內心的陰影與光有多少比例，以及你與 11 位角色的相處 / 情侶適配度與代表人物。</p>
-
-  <div id="question-area">
-    <div id="progress">
-      <span id="progress-text"></span>
-      <span id="hint-text">直覺選擇最接近你的那一個就好。</span>
-    </div>
-    <div id="question-text"></div>
-    <div id="choices" class="choices"></div>
-  </div>
-
-  <div id="results">
-    <!-- 代表人物區塊 -->
-    <div id="rep-section">
-      <div class="rep-label">你的代表人物</div>
-      <div class="rep-name" id="rep-name"></div>
-      <div class="rep-type-line">
-        <div class="rep-type" id="rep-type"></div>
-        <div class="rep-type" id="rep-match"></div>
+  <div class="app">
+    <header>
+      <div class="title-block">
+        <div class="title-main">DARK·LIGHT TEST</div>
+        <div class="title-sub">暗光心測｜找出屬於你的代表人物</div>
       </div>
-      <div class="rep-tagline" id="rep-tagline"></div>
-      <div class="rep-desc" id="rep-desc"></div>
-    </div>
+      <button class="music-btn" id="musicToggle">
+        <div class="music-dot"></div>
+        <span id="musicLabel">BGM 關</span>
+      </button>
+      <audio id="bgm" src="darklight.mp3" loop></audio>
+    </header>
 
-    <div class="result-section-title">你的黑暗面 vs 陽光面</div>
-    <div class="bar-container">
-      <div id="bar-dark" class="bar-dark" style="width:50%;"></div>
-      <div id="bar-light" class="bar-light" style="width:50%;"></div>
-    </div>
-    <div class="bar-labels">
-      <span id="dark-label">黑暗面 50%</span>
-      <span id="light-label">陽光面 50%</span>
-    </div>
+    <!-- 首頁 -->
+    <section class="page active" id="page-intro">
+      <div class="intro-title">你的靈魂，偏向黑夜還是微光？</div>
+      <div class="intro-tagline">
+        透過 20 題情境選擇，測出你體內的黑暗面 / 陽光面比例，並找出最貼近你的角色。
+      </div>
 
-    <div class="result-section-title">你的內心狀態</div>
-    <div id="inner-state"></div>
+      <div class="pill-row">
+        <div class="pill">黑暗面 vs 陽光面百分比</div>
+        <div class="pill">代表人物 × MBTI</div>
+        <div class="pill">友情 / 戀愛適配度</div>
+        <div class="pill">阿鳴、冥琛、錦旻 等 11 角色</div>
+      </div>
 
-    <div class="result-section-title">與各角色的相處 / 情侶適配度</div>
-    <div class="char-list" id="char-list"></div>
+      <div class="intro-block">
+        直覺回答就好，沒有「正確答案」。  
+        系統會根據你的選項，計算五個向度：
+        <b>黑暗感、光亮感、情緒深度、掌控慾、社交能量</b>，  
+        再與每位角色的性格輪廓比對，選出你最接近的代表人物。
+      </div>
 
-    <button id="restart-btn">再玩一次</button>
+      <button class="start-btn" id="startBtn">
+        開始測驗
+      </button>
+    </section>
 
-    <div class="meta">
-      <span class="badge">僅供娛樂參考，卻有機會戳中你的某一面</span>
-      <span>可以截圖結果，分享給朋友一起測。</span>
-    </div>
+    <!-- 題目頁 -->
+    <section class="page" id="page-quiz">
+      <div class="question-meta">
+        <div id="qProgressText">第 1 / 20 題</div>
+        <div class="progress-outer">
+          <div class="progress-inner" id="qProgressBar"></div>
+        </div>
+      </div>
+
+      <div class="question-text" id="qText"></div>
+      <div class="question-desc" id="qDesc"></div>
+      <div class="options" id="options"></div>
+    </section>
+
+    <!-- 結果頁 -->
+    <section class="page" id="page-result">
+      <div class="results-header">
+        <div class="rep-label">代表人物</div>
+        <div class="rep-name" id="repName"></div>
+        <div class="rep-type" id="repType"></div>
+        <div class="rep-match" id="repMatch"></div>
+        <div class="rep-tagline" id="repTagline"></div>
+        <div class="rep-desc" id="repDesc"></div>
+      </div>
+
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-label" id="darkLabel">黑暗面 0%</div>
+          <div class="bar-track">
+            <div class="bar-fill-dark" id="barDark"></div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label" id="lightLabel">陽光面 0%</div>
+          <div class="bar-track">
+            <div class="bar-fill-light" id="barLight"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="inner-state" id="innerState">
+        內在狀態分析載入中……
+      </div>
+
+      <div class="section-title">與 11 位角色的適配度</div>
+      <div class="char-list" id="charList"></div>
+
+      <button class="restart-btn" id="restartBtn">
+        再玩一次
+      </button>
+    </section>
   </div>
-</div>
 
-<!-- ===== 測驗邏輯 JS（角色資料 + 題目 + 計算） ===== -->
-<script>
-  // 角色資料：含 MBTI
-  const characters = {
-    "摩卡": {
-      mbti: "ISFJ",
-      dark: 30, light: 85, emo: 80, dom: 30, soc: 60,
-      type: "暖心陪伴者",
-      tagline: "「只要你不丟下我，我可以一直在你身邊。」",
-      summary: "情感細膩、黏人卻很溫柔的存在。喜歡給人安全感，也害怕被丟下。",
-      detail:
-"你和摩卡的連結代表：你內心有一塊很柔軟、很想被好好對待的地方。\n\n你不是真正脆弱，而是感受力很高，只是常常用乖巧或懂事去包裝自己。你重視細節、會記得別人對你的好與壞，也容易在關係裡默默付出。\n\n這類型的人在關係裡最怕的是「被忽略」、或者「被當成理所當然」，但只要得到真誠回應，就能發揮驚人的耐心和溫柔。"
-    },
-    "錦旻": {
-      mbti: "INFJ",
-      dark: 75, light: 45, emo: 90, dom: 70, soc: 30,
-      type: "深情執著守望者",
-      tagline: "「我不一定說很多，但我會一直站在這裡。」",
-      summary: "外表冷、內心戲很滿的類型。愛上之後會極度專一，卻也容易變得偏執。",
-      detail:
-"你和錦旻的適配度高，代表你理解那種「表面冷，內心很吵」的感覺。\n\n你可能不太擅長把情緒講得很明白，但感受卻非常深。你在關係裡渴望的是穩定與專一，只是有時候會因為太在乎而不安，變得敏感或佔有欲偏高。\n\n這種個性的人，一旦得到安全感，就能給出非常驚人的忠誠與守護。"
-    },
-    "御": {
-      mbti: "INTJ",
-      dark: 70, light: 40, emo: 50, dom: 65, soc: 25,
-      type: "影子傭兵型守護者",
-      tagline: "「我不一定會說愛你，但我會做。」",
-      summary: "話不多、很理性，很多情緒都放在心裡自己消化。",
-      detail:
-"你和御同類的地方在於：你習慣先把話吞進去，再決定要不要說出口。\n\n你可能不喜歡吵架，也不喜歡失控的場面，所以選擇用冷靜與保持距離來保護自己。你觀察力很強，會默默記住很多事，但不會每一條都講出來。\n\n這類人很需要「被信任」，而不是被逼問；只要有一個人願意靜靜坐在你身邊，你就會慢慢把心打開。"
-    },
-    "黎越": {
-      mbti: "ENTP",
-      dark: 60, light: 60, emo: 65, dom: 75, soc: 70,
-      type: "腹黑紳士策士",
-      tagline: "「我看懂你，但我不一定說破。」",
-      summary: "頭腦很好、看人很準，優雅又帶危險感。",
-      detail:
-"若你的代表人物是黎越，代表你在光與暗之間有非常漂亮的平衡。\n\n你能溫柔，也能犀利；能體諒別人，也能在必要時關掉情緒保護自己。你不太喜歡單純到天真的世界觀，反而覺得「看懂現實之後還能保持溫柔」才是很難得的事。\n\n你可能有點悶騷、也有點聰明到讓人害怕，但你真正想要的是——找到一個不用防備、可以暫時放下算計的地方。"
-    },
-    "夏冥琛": {
-      mbti: "ISFJ",
-      dark: 65, light: 80, emo: 85, dom: 70, soc: 40,
-      type: "病嬌系守護者",
-      tagline: "「你可以不懂自己，但我會先懂你。」",
-      summary: "把保護別人當成本能，對在乎的人極度溫柔。",
-      detail:
-"和夏冥琛契合的人，通常內心對「被照顧、被守護」有很強烈的渴望，但同時也害怕給別人添麻煩。\n\n你可能常常反過來當那個照顧別人的人，卻很少讓別人真正看到你的疲累。你會希望身邊有個可靠的存在，能在你崩潰之前先注意到你不對勁。\n\n在關係裡，你不是冷酷，而是太在意，所以總是在衡量：我這樣會不會太黏、會不會太吵？"
-    },
-    "卡特": {
-      mbti: "ESTJ",
-      dark: 70, light: 55, emo: 55, dom: 90, soc: 60,
-      type: "沉穩支配型魔王",
-      tagline: "「你可以選擇相信我，剩下的我來處理。」",
-      summary: "壓場、理性、強勢，習慣掌控局面。",
-      detail:
-"如果你的結果指向卡特，代表你對「掌控感」和「可靠」這兩件事非常有感。\n\n你不一定喜歡被壓制，但你理解那種為了讓事情順利，只好自己扛起來的心情。你或許外表看起來很好說話，但在某些底線上非常固執，而且不喜歡被挑戰。\n\n你在關係裡希望遇到的，是一個能理解你肩膀重量的人，而不是只會說「你很好」卻無法一起承受的人。"
-    },
-    "鳴卡洛斯": {
-      mbti: "ESFP",
-      dark: 35, light: 80, emo: 75, dom: 55, soc: 75,
-      type: "大狗狗戰士",
-      tagline: "「你一個皺眉，我就衝上去了。」",
-      summary: "熱情、衝動、心地善良，很容易為了你往前衝。",
-      detail:
-"和鳴卡洛斯同類的人，心很直，也很真。\n\n你在乎的人開心，你就開心；你在乎的人受傷，你會比他更激動。你可能有一點衝動，有時候講話太快、動作太快，但出發點大多是善意。\n\n你需要的是一個能理解你、又能溫柔拉住你的人——在你想往前衝時，提醒你休息也沒關係。"
-    },
-    "沈卿": {
-      mbti: "INFP",
-      dark: 45, light: 85, emo: 85, dom: 35, soc: 50,
-      type: "溫柔療癒者",
-      tagline: "「你不用立刻變好，我可以先陪你。」",
-      summary: "氣質安靜、有耐心，擅長用傾聽與陪伴讓人安定下來。",
-      detail:
-"你如果落在沈卿這一型，代表你對情緒非常敏感，也非常溫柔。\n\n你總是能感覺到別人話裡沒說完的那部分，也懂得在別人崩潰的時候默默在旁邊。你不喜歡太強烈的衝突，更喜歡用慢慢談的方式去磨合。\n\n但同時，你也容易為了照顧別人而忽略自己。你需要的，是一個會反過來問你「那你呢？」的人。"
-    },
-    "季寒曜": {
-      mbti: "ENTJ",
-      dark: 75, light: 65, emo: 80, dom: 95, soc: 70,
-      type: "霸總型執著愛人",
-      tagline: "「你可以逃，但我不一定會放手。」",
-      summary: "外冷內熱、非常主導型，一旦認定就不輕易放手。",
-      detail:
-"結果落在季寒曜，代表你的內心對「強烈的愛與被選擇」非常有感。\n\n你可能一方面害怕被控制，一方面又期望有一個人能把你放在最重要的位置，不是『順便愛你』，而是『只想要你』。你對感情的要求其實不低，也不太能接受敷衍。\n\n你可以甜，也可以狠，但前提是——對方必須拿出跟你一樣的真心。"
-    },
-    "阿鳴（慕鳴淵）": {
-      mbti: "INTP",
-      dark: 80, light: 60, emo: 85, dom: 80, soc: 55,
-      type: "瘋批病嬌觀測者",
-      tagline: "「你不說，我也知道；你想逃，我也知道。」",
-      summary: "腦袋轉得很快、心眼也多，黑暗與溫柔同時存在。",
-      detail:
-"如果你的代表人物是阿鳴，代表你是那種：看得很透卻還是願意喜歡世界的人。\n\n你知道人性有多複雜、關係有多麻煩，所以你比一般人多了一層防備與觀察。但當你願意靠近一個人時，那是經過篩選與確認的，不是隨便給的。\n\n你可以很壞，也可以很好；你可以很狠，也可以很溫柔。真正決定你要用哪一面對待對方的，是——他到底有沒有好好對你。"
-    },
-    "夏茗": {
-      mbti: "INFP / INFJ",
-      dark: 55, light: 80, emo: 90, dom: 45, soc: 60,
-      type: "敏感溫柔創作者",
-      tagline: "「我有很多受傷的地方，但也有很多想守護的東西。」",
-      summary: "感受力強、共情能力高，容易被世界傷到，也容易被小事感動。",
-      detail:
-"與夏茗同類的人，內心就像一個很大的劇場：有傷、有光、有遺憾，也有暖。\n\n你會觀察身邊的人，會把很多感受記在心裡，有時候寫進文字、畫進畫裡、有時候只是默默收藏。你怕麻煩別人，但又很希望有人主動走進你的世界。\n\n你不是脆弱，而是太懂情緒，所以也更需要一個既能抱抱你、又能陪你面對現實的人。"
+  <script>
+    // 工具函式
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
     }
-  };
 
-  // 題目列表（20 題）
-  const questions = [
-    {
-      text: "如果有人突然問你「你最近還好嗎？」而你其實狀態不太好，你最常怎麼回應？",
-      choices: [
-        { text: "笑笑說「還行啦」，什麼都不多講。", effects: { dark: 6, light: 2, emo: 4, dom: 0, soc: -2 } },
-        { text: "會誠實說「不太好」，但只挑一小部分分享。", effects: { dark: 2, light: 5, emo: 5, dom: 2, soc: 2 } },
-        { text: "直接轉移話題，當作沒聽到。", effects: { dark: 7, light: 0, emo: 1, dom: 3, soc: -4 } },
-        { text: "反問對方怎麼突然這樣問，順便了解他在想什麼。", effects: { dark: 3, light: 3, emo: 4, dom: 4, soc: 3 } }
-      ]
-    },
-    {
-      text: "你對「依賴別人」這件事的感覺比較接近哪種？",
-      choices: [
-        { text: "有一點依賴才像關係，彼此互相需要很重要。", effects: { dark: 1, light: 6, emo: 6, dom: -1, soc: 2 } },
-        { text: "可以依賴，但我更習慣自己扛。", effects: { dark: 4, light: 3, emo: 4, dom: 3, soc: -1 } },
-        { text: "不太相信依賴，依賴越多，失去時越痛。", effects: { dark: 8, light: 0, emo: 5, dom: 4, soc: -2 } },
-        { text: "看對象而定，如果是我信的人，就會很放心。", effects: { dark: 3, light: 5, emo: 5, dom: 1, soc: 2 } }
-      ]
-    },
-    {
-      text: "當你真的生氣時，你最有可能的反應是：",
-      choices: [
-        { text: "表面看不太出來，只是默默冷掉。", effects: { dark: 6, light: 1, emo: 5, dom: 3, soc: -4 } },
-        { text: "會溫和但很清楚地說出不滿。", effects: { dark: 2, light: 6, emo: 5, dom: 5, soc: 1 } },
-        { text: "先爆一波情緒，再慢慢後悔。", effects: { dark: 6, light: 2, emo: 7, dom: 4, soc: 0 } },
-        { text: "用開玩笑或冷幽默的方式帶過，實際記很久。", effects: { dark: 7, light: 3, emo: 5, dom: 4, soc: 2 } }
-      ]
-    },
-    {
-      text: "面對喜歡的人，你最容易：",
-      choices: [
-        { text: "變得特別溫柔，會主動照顧對方。", effects: { dark: 1, light: 7, emo: 6, dom: -1, soc: 4 } },
-        { text: "表面正常，內心戲超多，不敢太明顯。", effects: { dark: 4, light: 3, emo: 7, dom: 1, soc: -1 } },
-        { text: "不太示弱，反而會逗對方、挑戰對方。", effects: { dark: 4, light: 3, emo: 4, dom: 6, soc: 3 } },
-        { text: "會先觀察很久，確認值得才投入。", effects: { dark: 3, light: 3, emo: 4, dom: 4, soc: -1 } }
-      ]
-    },
-    {
-      text: "你對「佔有慾」這件事的看法是：",
-      choices: [
-        { text: "有一點佔有慾才代表在乎，只要不過頭就好。", effects: { dark: 5, light: 4, emo: 5, dom: 5, soc: 1 } },
-        { text: "我不喜歡被管，也不太想管人。", effects: { dark: 2, light: 6, emo: 3, dom: -1, soc: 3 } },
-        { text: "如果真的很愛，我可以接受他只看著我。", effects: { dark: 6, light: 3, emo: 7, dom: 2, soc: 0 } },
-        { text: "表面覺得自由比較好，但心裡其實很容易吃醋。", effects: { dark: 7, light: 3, emo: 7, dom: 3, soc: 1 } }
-      ]
-    },
-    {
-      text: "你遇到壓力時，心裡比較常出現的念頭是：",
-      choices: [
-        { text: "撐一下就過了，我再咬牙一下就好。", effects: { dark: 4, light: 4, emo: 5, dom: 4, soc: -1 } },
-        { text: "我好想有人抱抱，什麼都不用說只要陪在旁邊。", effects: { dark: 2, light: 6, emo: 7, dom: -1, soc: 1 } },
-        { text: "冷靜下來，把事情拆開一件一件處理。", effects: { dark: 2, light: 4, emo: 3, dom: 5, soc: -1 } },
-        { text: "會有一點想要消失，躲起來不讓人找到。", effects: { dark: 7, light: 1, emo: 7, dom: 1, soc: -4 } }
-      ]
-    },
-    {
-      text: "當你覺得被誤解時，你比較會：",
-      choices: [
-        { text: "懶得解釋，時間久了大家會看到真相。", effects: { dark: 6, light: 2, emo: 4, dom: 3, soc: -2 } },
-        { text: "會好好說清楚，希望彼此不要有誤會。", effects: { dark: 2, light: 7, emo: 5, dom: 4, soc: 3 } },
-        { text: "嘴上說沒事，心裡默默記帳。", effects: { dark: 7, light: 1, emo: 6, dom: 3, soc: -1 } },
-        { text: "看關係深不深，如果是重要的人，才會認真解釋。", effects: { dark: 3, light: 4, emo: 4, dom: 3, soc: 1 } }
-      ]
-    },
-    {
-      text: "如果你的另一半情緒不穩定，你通常會：",
-      choices: [
-        { text: "先安撫對方，把他情緒接住再說。", effects: { dark: 1, light: 7, emo: 7, dom: 2, soc: 2 } },
-        { text: "保持冷靜，幫忙分析問題、找解決方法。", effects: { dark: 2, light: 4, emo: 3, dom: 5, soc: 0 } },
-        { text: "會被一起捲進去，兩個人一起崩潰。", effects: { dark: 6, light: 2, emo: 7, dom: -1, soc: -1 } },
-        { text: "先讓對方冷靜一下，再用比較理智的方式談。", effects: { dark: 3, light: 4, emo: 4, dom: 4, soc: 1 } }
-      ]
-    },
-    {
-      text: "你比較喜歡哪一種相處方式？",
-      choices: [
-        { text: "像家人一樣，日常生活細水長流。", effects: { dark: 2, light: 7, emo: 6, dom: 2, soc: 2 } },
-        { text: "像戰友一樣，互相扶持一起扛事情。", effects: { dark: 3, light: 5, emo: 5, dom: 4, soc: 2 } },
-        { text: "像對手一樣，互相刺激、互相較勁。", effects: { dark: 5, light: 3, emo: 4, dom: 6, soc: 3 } },
-        { text: "像觀眾與主角，一個人很戲很多，另一個人靜靜看著。", effects: { dark: 6, light: 3, emo: 6, dom: 3, soc: 1 } }
-      ]
-    },
-    {
-      text: "你對「自己的黑暗面」態度是：",
-      choices: [
-        { text: "我知道自己有黑暗面，但我接受那是我一部分。", effects: { dark: 6, light: 5, emo: 6, dom: 4, soc: 0 } },
-        { text: "我盡量不讓黑暗面影響別人，只自己消化。", effects: { dark: 5, light: 6, emo: 7, dom: 2, soc: -1 } },
-        { text: "我有時候會有衝動想把黑暗面拿出來嚇人。", effects: { dark: 8, light: 2, emo: 5, dom: 5, soc: 2 } },
-        { text: "不太想面對，能裝沒看到就裝沒看到。", effects: { dark: 7, light: 1, emo: 4, dom: 1, soc: -2 } }
-      ]
-    },
-    {
-      text: "如果你能選擇一種「被看見的樣子」，你比較希望是：",
-      choices: [
-        { text: "大家覺得我溫柔、可靠，可以依靠。", effects: { dark: 2, light: 7, emo: 6, dom: 3, soc: 3 } },
-        { text: "大家覺得我很聰明、有能力，能解決問題。", effects: { dark: 3, light: 4, emo: 3, dom: 6, soc: 1 } },
-        { text: "只有少數人知道真正的我，其他人看到的是表面。", effects: { dark: 6, light: 3, emo: 6, dom: 3, soc: -1 } },
-        { text: "看怎樣比較方便生存，我會依情況切換。", effects: { dark: 7, light: 3, emo: 5, dom: 5, soc: 2 } }
-      ]
-    },
-    {
-      text: "你對「長期關係」的期待比較像：",
-      choices: [
-        { text: "不一定要很轟烈，但要穩、要真實。", effects: { dark: 2, light: 7, emo: 6, dom: 3, soc: 2 } },
-        { text: "可以很激烈、很戲劇，但一定要特別。", effects: { dark: 6, light: 4, emo: 7, dom: 4, soc: 2 } },
-        { text: "比起談戀愛，先把自己活好比較重要。", effects: { dark: 4, light: 4, emo: 3, dom: 4, soc: -1 } },
-        { text: "順其自然，如果遇到能懂我的人就抓緊。", effects: { dark: 3, light: 5, emo: 5, dom: 2, soc: 1 } }
-      ]
-    },
-    {
-      text: "面對「背叛」這件事，你直覺會：",
-      choices: [
-        { text: "切得很乾脆，從此當作不認識。", effects: { dark: 7, light: 2, emo: 5, dom: 5, soc: -2 } },
-        { text: "表面淡淡的，但內心會受傷很久。", effects: { dark: 6, light: 3, emo: 8, dom: 2, soc: -2 } },
-        { text: "會想弄清楚原因，再決定要不要原諒。", effects: { dark: 3, light: 4, emo: 5, dom: 4, soc: 0 } },
-        { text: "我會先懷疑是不是自己哪裡有問題。", effects: { dark: 5, light: 3, emo: 7, dom: 1, soc: -1 } }
-      ]
-    },
-    {
-      text: "如果你有一個「完全懂你黑暗面」的人，他做哪件事會讓你最放心？",
-      choices: [
-        { text: "什麼都不說，只在我需要時抱一下我。", effects: { dark: 3, light: 7, emo: 8, dom: -1, soc: 1 } },
-        { text: "會替我擋下一些我不想面對的東西。", effects: { dark: 4, light: 5, emo: 6, dom: 4, soc: 1 } },
-        { text: "會直白指出我的問題，但不是要傷害我。", effects: { dark: 3, light: 5, emo: 4, dom: 5, soc: 1 } },
-        { text: "在我失控時，他還是選擇站在我這邊。", effects: { dark: 7, light: 5, emo: 7, dom: 2, soc: 0 } }
-      ]
-    },
-    {
-      text: "你在團體中的狀態，多半像是：",
-      choices: [
-        { text: "照顧大家氣氛、怕尷尬所以會主動講話。", effects: { dark: 2, light: 6, emo: 5, dom: 3, soc: 7 } },
-        { text: "安靜觀察、偶爾丟幾句有梗的話。", effects: { dark: 4, light: 4, emo: 4, dom: 3, soc: 1 } },
-        { text: "比較邊緣，會躲到安全的小角落。", effects: { dark: 5, light: 2, emo: 5, dom: 1, soc: -4 } },
-        { text: "看心情，有時當主角，有時直接消失。", effects: { dark: 5, light: 4, emo: 5, dom: 4, soc: 2 } }
-      ]
-    },
-    {
-      text: "你對「操縱局面」這件事的感受最接近：",
-      choices: [
-        { text: "不喜歡操控，也不喜歡被操控。", effects: { dark: 3, light: 6, emo: 4, dom: 1, soc: 1 } },
-        { text: "偶爾會偷偷安排一些事情往我想要的方向走。", effects: { dark: 7, light: 3, emo: 4, dom: 6, soc: 2 } },
-        { text: "比起操控，他人的選擇與反應更讓我有趣。", effects: { dark: 4, light: 4, emo: 4, dom: 4, soc: 3 } },
-        { text: "如果是為了保護自己或重要的人，我可以接受操作一點局面。", effects: { dark: 6, light: 4, emo: 5, dom: 5, soc: 1 } }
-      ]
-    },
-    {
-      text: "你最常對自己說的安慰句是：",
-      choices: [
-        { text: "「沒關係，你已經很努力了。」", effects: { dark: 2, light: 7, emo: 7, dom: 1, soc: 1 } },
-        { text: "「再撐一下，之後會好起來的。」", effects: { dark: 4, light: 4, emo: 5, dom: 4, soc: 0 } },
-        { text: "「算了，反正也習慣了。」", effects: { dark: 7, light: 1, emo: 6, dom: 2, soc: -2 } },
-        { text: "「下次不要再讓自己掉進同樣的洞。」", effects: { dark: 5, light: 4, emo: 4, dom: 5, soc: 0 } }
-      ]
-    },
-    {
-      text: "如果把你內心的劇場比喻成一種故事類型，你覺得最像：",
-      choices: [
-        { text: "療癒系成長故事，有眼淚也有溫暖。", effects: { dark: 3, light: 7, emo: 8, dom: 2, soc: 2 } },
-        { text: "權謀劇，大家各有盤算，但我不一定是最壞的那個。", effects: { dark: 7, light: 3, emo: 5, dom: 7, soc: 2 } },
-        { text: "恐怖懸疑片，很多未說出口的秘密與壓力。", effects: { dark: 8, light: 2, emo: 7, dom: 4, soc: -2 } },
-        { text: "戀愛修羅場，甜又虐，自己有時候也搞不懂自己。", effects: { dark: 6, light: 5, emo: 8, dom: 3, soc: 2 } }
-      ]
-    },
-    {
-      text: "最後一題：如果要選一個句子當你現在的心境標籤，你會選：",
-      choices: [
-        { text: "「我還在學習好好愛自己。」", effects: { dark: 3, light: 7, emo: 8, dom: 1, soc: 1 } },
-        { text: "「我沒有那麼善良，但我也沒有那麼壞。」", effects: { dark: 6, light: 5, emo: 6, dom: 3, soc: 0 } },
-        { text: "「如果沒有人懂我，那就先讓我觀察大家。」", effects: { dark: 6, light: 3, emo: 5, dom: 4, soc: -1 } },
-        { text: "「不管世界怎樣，我還是想好好地去愛幾個人。」", effects: { dark: 3, light: 8, emo: 8, dom: 2, soc: 2 } }
-      ]
-    }
-  ];
+    // 角色設定（可以之後慢慢微調文字）
+    const characters = [
+      {
+        name: "阿鳴（慕鳴淵）",
+        mbti: "INFJ",
+        type: "深夜系病嬌觀察者",
+        ideal: { dark: 78, light: 22, emo: 88, dom: 62, soc: 38 },
+        tagline: "看起來安靜，實際上把所有情緒都記得很清楚。",
+        summary: "外表冷靜、說話溫柔，內心有自己的一套原則和執著。喜歡觀察人，也很會讀空氣。",
+        detail:
+          "你習慣把情緒藏在深處，只在安全的對象面前鬆口。你對關係有強烈的投入與佔有感，一旦認定就很難放手，容易成為別人生命裡那個既可靠又有點危險的存在。"
+      },
+      {
+        name: "夏冥琛",
+        mbti: "INTJ",
+        type: "理智系深情控制狂",
+        ideal: { dark: 65, light: 35, emo: 82, dom: 80, soc: 40 },
+        tagline: "情緒看起來很安靜，但心裡從來沒有放過任何事。",
+        summary: "冷感外表下藏著極深的情緒，懂得算計，也懂得溫柔，只是不輕易表現給別人看。",
+        detail:
+          "你擅長用理性保護自己，但對在乎的人非常偏心。你不喜歡失控，所以總是想把局勢握在手裡，也難以容忍背叛。你適合和能理解你沉默的人相處。"
+      },
+      {
+        name: "錦旻",
+        mbti: "INFP",
+        type: "封印系深淵溫柔怪物",
+        ideal: { dark: 82, light: 28, emo: 90, dom: 45, soc: 30 },
+        tagline: "你不是不溫柔，只是溫柔之前先是深淵。",
+        summary: "敏感且情緒很深，既可以為愛柔軟，也可以為傷痛變得極端。",
+        detail:
+          "你對情感非常認真，一旦投入就像把靈魂都交出去。你懂得體貼別人，但也容易被忽略、被辜負。你的黑暗不是惡意，而是長期受傷後形成的自我保護。"
+      },
+      {
+        name: "御",
+        mbti: "ISTP",
+        type: "影子系冷感傭兵",
+        ideal: { dark: 70, light: 30, emo: 45, dom: 68, soc: 32 },
+        tagline: "不多話，不代表沒有在意。",
+        summary: "行動力強，冷靜、實際，不喜歡情緒化的場面，卻會在關鍵時刻替你擋一刀。",
+        detail:
+          "你擅長一個人處理事情，不愛廢話。你不習慣示弱，也不習慣討拍，但你會用行動證明自己在意誰。你適合和尊重你界線、又不會一直逼問你內心的人相處。"
+      },
+      {
+        name: "黎越",
+        mbti: "ENTJ",
+        type: "微笑系危險領導者",
+        ideal: { dark: 55, light: 45, emo: 60, dom: 88, soc: 70 },
+        tagline: "笑著說話，順便把局都布好了。",
+        summary: "外表溫和、說話有禮，但實際上很清楚自己要什麼，也很擅長掌控局勢。",
+        detail:
+          "你頭腦清楚，行動果斷，有強烈的目標感。你在關係裡也偏主導型，喜歡照顧人、安排一切，但不喜歡被束縛。你適合和願意相信你、又有自己靈魂的人在一起。"
+      },
+      {
+        name: "卡特",
+        mbti: "ENTP",
+        type: "魔王系遊戲玩家",
+        ideal: { dark: 75, light: 35, emo: 55, dom: 90, soc: 75 },
+        tagline: "不是想毀掉世界，只是覺得世界有點無聊。",
+        summary: "喜歡觀察、喜歡試探，對所有規則都有自己的解讀。",
+        detail:
+          "你容易對世界感到無聊，因此會主動創造變化。你喜歡玩遊戲、試探界線，有時也會不小心傷到人。你很聰明，也很清醒，只是難得遇到真正能和你對等玩的人。"
+      },
+      {
+        name: "鳴卡洛斯",
+        mbti: "ESFP",
+        type: "大狗系保護者",
+        ideal: { dark: 30, light: 80, emo: 70, dom: 55, soc: 85 },
+        tagline: "有點笨笨的，但會很努力把你護好。",
+        summary: "外向、熱情、行動派，容易讓人放鬆警戒。",
+        detail:
+          "你真誠、直接，情緒來得快也去得快。你很願意為喜歡的人付出，也會在意自己有沒有照顧好大家。你適合和不會消耗你、會回應你熱情的人在一起。"
+      },
+      {
+        name: "沈卿",
+        mbti: "ISFJ",
+        type: "安靜系守夜人",
+        ideal: { dark: 38, light: 62, emo: 82, dom: 35, soc: 45 },
+        tagline: "你總是在看著大家有沒有好好活下去。",
+        summary: "溫柔、細膩、很會照顧人，但習慣把自己的情緒排在最後。",
+        detail:
+          "你對別人的感受很敏銳，很怕自己造成麻煩。你會默默承受很多東西，也不太會拒絕。你適合被真心對待、可以放心說「我也很累」的關係。"
+      },
+      {
+        name: "摩卡",
+        mbti: "INFP",
+        type: "小動物系依賴型治癒",
+        ideal: { dark: 28, light: 78, emo: 88, dom: 30, soc: 60 },
+        tagline: "你不是什麼都不會，你只是習慣被溫柔對待。",
+        summary: "感受力很高，想像力豐富，容易受傷也容易被安撫。",
+        detail:
+          "你渴望被理解，也很願意為重要的人溫柔。你會把在意的人放在心裡很多年，也容易為他人的一句話難過很久。你適合和穩定、安全、願意好好說話的人在一起。"
+      },
+      {
+        name: "季寒曜",
+        mbti: "ESTJ",
+        type: "霸總系行動派",
+        ideal: { dark: 52, light: 48, emo: 60, dom: 92, soc: 72 },
+        tagline: "嘴很壞，行動卻很老實。",
+        summary: "外表強勢、做事俐落，實際上很重感情，也很願意給承諾。",
+        detail:
+          "你不喜歡拖拖拉拉，也不喜歡曖昧不清。你習慣扛責任、做決定，很容易不小心過度保護。你適合和能看懂你溫柔、又不怕你嘴壞的人相處。"
+      },
+      {
+        name: "夏茗",
+        mbti: "INFP / ENFP",
+        type: "混合系劇場體質",
+        ideal: { dark: 45, light: 55, emo: 90, dom: 45, soc: 65 },
+        tagline: "你一邊怕受傷，一邊又拼命往前貼近人。",
+        summary: "感性又有行動力，會在腦內演很多版本的劇本，但還是會選擇相信。",
+        detail:
+          "你對關係有很多不安，也有很多真心。你容易為別人著想，也容易懷疑自己是不是不夠好。你適合被好好捧著、被尊重感受的關係，而不是被消耗。"
+      }
+    ];
 
-  // 初始狀態
-  const initialState = { dark: 50, light: 50, emo: 50, dom: 50, soc: 50 };
-  let state = { ...initialState };
-  let currentIndex = 0;
+    // 題目設計：每個選項會影響 dark / light / emo / dom / soc
+    const questions = [
+      {
+        text: "在一群人裡，你通常是什麼狀態？",
+        desc: "第一次見面的聚會。",
+        options: [
+          {
+            text: "先旁觀、安靜觀察每個人，等氣氛穩了才說話。",
+            tag: "觀察型",
+            effect: { dark: 8, emo: 5, dom: 0, soc: -5, light: -3 }
+          },
+          {
+            text: "會主動開話題、照顧場面尷尬，把氣氛撐起來。",
+            tag: "氣氛組",
+            effect: { dark: -5, emo: 0, dom: 5, soc: 10, light: 8 }
+          },
+          {
+            text: "找一兩個順眼的人安靜聊天，不會刻意撐場。",
+            tag: "選擇性社交",
+            effect: { dark: 0, emo: 5, dom: 0, soc: 3, light: 2 }
+          },
+          {
+            text: "人很多會覺得很累，只想快點結束回家。",
+            tag: "社交疲勞",
+            effect: { dark: 5, emo: 8, dom: 0, soc: -8, light: -2 }
+          }
+        ]
+      },
+      {
+        text: "有人無意間說了一句讓你受傷的話，你會？",
+        desc: "對方並不是在吵架，只是順口的一句。",
+        options: [
+          {
+            text: "當下笑笑帶過，回家後會一直反芻那句話。",
+            tag: "回放機制",
+            effect: { dark: 6, emo: 10, dom: -2, soc: -2, light: 0 }
+          },
+          {
+            text: "直接問對方這句話是什麼意思，確認清楚。",
+            tag: "正面對質",
+            effect: { dark: 2, emo: 4, dom: 8, soc: 2, light: 2 }
+          },
+          {
+            text: "假裝沒事，但會默默把對方放在心裡做記號。",
+            tag: "悶騷記帳",
+            effect: { dark: 8, emo: 8, dom: 2, soc: -2, light: -2 }
+          },
+          {
+            text: "覺得對方可能只是嘴滑，不太會放在心上。",
+            tag: "快速放下",
+            effect: { dark: -4, emo: 0, dom: 0, soc: 2, light: 6 }
+          }
+        ]
+      },
+      {
+        text: "面對喜歡的人，你比較像哪一種？",
+        desc: "不一定告白，只是日常互動。",
+        options: [
+          {
+            text: "表面冷靜，內心劇場很多，不太主動但超在意。",
+            tag: "悶騷暗戀",
+            effect: { dark: 6, emo: 10, dom: -2, soc: -2, light: 0 }
+          },
+          {
+            text: "會直接釋放好感、約對方一起做什麼，不喜歡拖。",
+            tag: "行動派",
+            effect: { dark: 0, emo: 4, dom: 8, soc: 6, light: 4 }
+          },
+          {
+            text: "會先觀察對方是不是安全的人，再慢慢靠近。",
+            tag: "慎重靠近",
+            effect: { dark: 4, emo: 6, dom: 2, soc: 0, light: 2 }
+          },
+          {
+            text: "不太主動，習慣等對方先表態才會認真投入。",
+            tag: "被動等待",
+            effect: { dark: 3, emo: 6, dom: -4, soc: -2, light: 0 }
+          }
+        ]
+      },
+      {
+        text: "如果你被誤會、甚至被冤枉，你會先做什麼？",
+        desc: "對方目前不太願意聽你解釋。",
+        options: [
+          {
+            text: "先冷靜觀察情況，把證據都收集好再一次說清楚。",
+            tag: "理性反擊",
+            effect: { dark: 5, emo: 2, dom: 8, soc: -2, light: 1 }
+          },
+          {
+            text: "當下很受傷，會先逃開現場，等情緒穩定再處理。",
+            tag: "情緒優先",
+            effect: { dark: 4, emo: 9, dom: -2, soc: -3, light: 0 }
+          },
+          {
+            text: "選擇沉默，讓時間證明一切，不想再多解釋。",
+            tag: "冷處理",
+            effect: { dark: 7, emo: 5, dom: 0, soc: -4, light: -2 }
+          },
+          {
+            text: "會盡量把話說完，不管對方聽不聽至少自己說過。",
+            tag: "硬著頭皮說",
+            effect: { dark: 2, emo: 5, dom: 4, soc: 2, light: 2 }
+          }
+        ]
+      },
+      {
+        text: "對你來說，「信任一個人」最困難的部分是？",
+        desc: "",
+        options: [
+          {
+            text: "怕對方哪一天忽然厭倦自己，什麼都不說就離開。",
+            tag: "被拋棄恐懼",
+            effect: { dark: 6, emo: 9, dom: -2, soc: -1, light: -1 }
+          },
+          {
+            text: "怕自己太依賴對方，失去判斷力和界線感。",
+            tag: "界線焦慮",
+            effect: { dark: 3, emo: 6, dom: 2, soc: 0, light: 1 }
+          },
+          {
+            text: "怕對方沒有自己看起來那麼善良或可靠。",
+            tag: "人性懷疑",
+            effect: { dark: 7, emo: 4, dom: 2, soc: -1, light: -2 }
+          },
+          {
+            text: "其實還好，只要互動久了自然就會知道可不可靠。",
+            tag: "時間派",
+            effect: { dark: -3, emo: 0, dom: 0, soc: 2, light: 5 }
+          }
+        ]
+      },
+      {
+        text: "如果你可以選一種「保護自己的方式」，你會？",
+        desc: "",
+        options: [
+          {
+            text: "把話說得很清楚，訂好底線和規則。",
+            tag: "契約型保護",
+            effect: { dark: 2, emo: 2, dom: 7, soc: 0, light: 2 }
+          },
+          {
+            text: "什麼都不說，但在心裡慢慢把人分區。",
+            tag: "內心黑名單",
+            effect: { dark: 7, emo: 4, dom: 2, soc: -3, light: -1 }
+          },
+          {
+            text: "用笑和玩笑話遮蔽真正的心情。",
+            tag: "輕鬆偽裝",
+            effect: { dark: 3, emo: 5, dom: 0, soc: 4, light: 3 }
+          },
+          {
+            text: "努力變強，讓自己就算受傷也有能力站起來。",
+            tag: "強化自我",
+            effect: { dark: 3, emo: 3, dom: 6, soc: 1, light: 2 }
+          }
+        ]
+      },
+      {
+        text: "當你真的生氣時，你比較像？",
+        desc: "",
+        options: [
+          {
+            text: "表面還是很冷靜，語氣變得很客觀，但每一句都很重。",
+            tag: "冷靜型暴怒",
+            effect: { dark: 6, emo: 4, dom: 6, soc: -2, light: -2 }
+          },
+          {
+            text: "當下會爆炸，之後很後悔自己講太多。",
+            tag: "情緒爆衝",
+            effect: { dark: 4, emo: 9, dom: -1, soc: 0, light: -1 }
+          },
+          {
+            text: "選擇離開現場，不想在情緒上頭時說任何話。",
+            tag: "物理撤退",
+            effect: { dark: 3, emo: 6, dom: 0, soc: -3, light: 0 }
+          },
+          {
+            text: "很少真正生氣，大多數時候只是失望。",
+            tag: "低頻憤怒",
+            effect: { dark: 5, emo: 7, dom: -1, soc: -1, light: 1 }
+          }
+        ]
+      },
+      {
+        text: "對你來說，「黑暗面」最接近哪種感覺？",
+        desc: "",
+        options: [
+          {
+            text: "是保護色，讓自己不再那麼容易受傷。",
+            tag: "保護型黑暗",
+            effect: { dark: 6, emo: 7, dom: 3, soc: -2, light: -1 }
+          },
+          {
+            text: "是想毀掉一切的衝動，但大多數時候你只是想睡覺。",
+            tag: "疲憊型黑暗",
+            effect: { dark: 7, emo: 8, dom: -2, soc: -2, light: -2 }
+          },
+          {
+            text: "是一種洞察力，讓你看穿人性和關係的真相。",
+            tag: "洞察型黑暗",
+            effect: { dark: 6, emo: 4, dom: 4, soc: 0, light: 1 }
+          },
+          {
+            text: "你自認黑暗感沒有那麼重，比較像偶爾的陰天。",
+            tag: "微量黑暗",
+            effect: { dark: -3, emo: 2, dom: 0, soc: 2, light: 6 }
+          }
+        ]
+      },
+      {
+        text: "如果可以選擇，你比較想要被哪種人喜歡？",
+        desc: "",
+        options: [
+          {
+            text: "很聰明、看得懂你、也願意尊重你界線的人。",
+            tag: "聰明溫柔型",
+            effect: { dark: 3, emo: 5, dom: 2, soc: 2, light: 4 }
+          },
+          {
+            text: "笨笨的、真誠又黏人，會一直陪在你身邊的人。",
+            tag: "大狗 / 小動物型",
+            effect: { dark: 0, emo: 7, dom: -2, soc: 4, light: 5 }
+          },
+          {
+            text: "強大又危險，能保護你，也可能一手毀掉世界的人。",
+            tag: "危險系",
+            effect: { dark: 7, emo: 4, dom: 6, soc: 0, light: -2 }
+          },
+          {
+            text: "穩定、不會消失，會慢慢陪你走很久的人。",
+            tag: "長線陪伴型",
+            effect: { dark: 2, emo: 6, dom: 0, soc: 2, light: 5 }
+          }
+        ]
+      },
+      {
+        text: "當你很想哭但不能哭的時候，你會？",
+        desc: "",
+        options: [
+          {
+            text: "找地方一個人躲起來，確定沒人看到才放任情緒。",
+            tag: "隱蔽式崩潰",
+            effect: { dark: 5, emo: 10, dom: -2, soc: -3, light: -1 }
+          },
+          {
+            text: "切換成理性模式，逼自己先把事情處理完。",
+            tag: "理性優先",
+            effect: { dark: 4, emo: 3, dom: 7, soc: 0, light: 1 }
+          },
+          {
+            text: "裝沒事，改成開玩笑的模式，之後再自己消化。",
+            tag: "搞笑式防禦",
+            effect: { dark: 4, emo: 5, dom: 1, soc: 3, light: 3 }
+          },
+          {
+            text: "會找一個很信任的人，把話全部講出來。",
+            tag: "選擇性傾訴",
+            effect: { dark: 2, emo: 8, dom: 0, soc: 2, light: 4 }
+          }
+        ]
+      },
+      // 題數到 20；下面再補 10 題較短的
+      {
+        text: "對「承諾」這件事你的感覺是？",
+        desc: "",
+        options: [
+          {
+            text: "說出口就要做到，所以很少給承諾。",
+            tag: "慎重承諾",
+            effect: { dark: 4, emo: 5, dom: 3, soc: -1, light: 1 }
+          },
+          {
+            text: "不一定每句都做得到，但當下真心就好。",
+            tag: "當下真心",
+            effect: { dark: 1, emo: 4, dom: 0, soc: 2, light: 3 }
+          },
+          {
+            text: "討厭空頭支票，所以會記得別人說過的每一句話。",
+            tag: "記帳型",
+            effect: { dark: 6, emo: 6, dom: 2, soc: -1, light: -1 }
+          },
+          {
+            text: "比較少去想承諾這種事，順其自然比較重要。",
+            tag: "隨緣派",
+            effect: { dark: -2, emo: 2, dom: 0, soc: 2, light: 4 }
+          }
+        ]
+      },
+      {
+        text: "你對「權力感」的態度是？",
+        desc: "",
+        options: [
+          {
+            text: "習慣掌控局面，不能掌控會很不安。",
+            tag: "強烈主導",
+            effect: { dark: 3, emo: 3, dom: 9, soc: 1, light: 0 }
+          },
+          {
+            text: "可以當領導，但不喜歡一直當那個負責的人。",
+            tag: "必要時領導",
+            effect: { dark: 1, emo: 2, dom: 5, soc: 2, light: 2 }
+          },
+          {
+            text: "寧願當執行的人，不想背負決策壓力。",
+            tag: "執行者",
+            effect: { dark: 1, emo: 3, dom: -2, soc: 0, light: 3 }
+          },
+          {
+            text: "覺得權力很危險，會盡量遠離那種位置。",
+            tag: "避開權力",
+            effect: { dark: 4, emo: 4, dom: -4, soc: -1, light: 0 }
+          }
+        ]
+      },
+      {
+        text: "你看待自己的方式，比較偏向？",
+        desc: "",
+        options: [
+          {
+            text: "覺得自己問題很多，但也很努力在活著。",
+            tag: "自我批判",
+            effect: { dark: 5, emo: 7, dom: -2, soc: -1, light: -1 }
+          },
+          {
+            text: "知道自己有優點也有缺點，大致上還能接受。",
+            tag: "相對和解",
+            effect: { dark: 0, emo: 4, dom: 0, soc: 1, light: 4 }
+          },
+          {
+            text: "覺得自己滿特別的，只是世界不一定懂你。",
+            tag: "自覺特異",
+            effect: { dark: 3, emo: 5, dom: 2, soc: 1, light: 2 }
+          },
+          {
+            text: "不太會認真想自己是怎樣的人。",
+            tag: "低自我凝視",
+            effect: { dark: -2, emo: 1, dom: 0, soc: 2, light: 2 }
+          }
+        ]
+      },
+      {
+        text: "如果別人突然疏遠你，你的第一反應是？",
+        desc: "",
+        options: [
+          {
+            text: "一定是我哪裡做不好，開始自我檢討。",
+            tag: "先怪自己",
+            effect: { dark: 4, emo: 7, dom: -3, soc: -2, light: -1 }
+          },
+          {
+            text: "可能對方有自己的狀態，先觀察一陣子再說。",
+            tag: "觀望派",
+            effect: { dark: 2, emo: 3, dom: 0, soc: 1, light: 3 }
+          },
+          {
+            text: "直接淡掉，覺得不主動說清楚的人也沒必要留。",
+            tag: "直接放生",
+            effect: { dark: 5, emo: 3, dom: 3, soc: -1, light: 0 }
+          },
+          {
+            text: "會想問清楚發生什麼事，不想悶在心裡。",
+            tag: "主動詢問",
+            effect: { dark: 1, emo: 5, dom: 2, soc: 2, light: 2 }
+          }
+        ]
+      },
+      {
+        text: "你對「控制」這件事的態度是？",
+        desc: "",
+        options: [
+          {
+            text: "只要是在意的人，我就很難完全不管。",
+            tag: "部分控制",
+            effect: { dark: 4, emo: 6, dom: 5, soc: 0, light: 0 }
+          },
+          {
+            text: "我可以接受被提醒，但無法被命令。",
+            tag: "需要尊重",
+            effect: { dark: 2, emo: 3, dom: 4, soc: 1, light: 2 }
+          },
+          {
+            text: "我會希望所有細節都照自己的方式來比較安心。",
+            tag: "高控制慾",
+            effect: { dark: 5, emo: 3, dom: 8, soc: -1, light: -1 }
+          },
+          {
+            text: "基本上各自過好自己的生活就好，不太會去管人。",
+            tag: "低控制慾",
+            effect: { dark: -2, emo: 2, dom: -3, soc: 1, light: 4 }
+          }
+        ]
+      },
+      {
+        text: "在群體裡，你最怕變成哪一種角色？",
+        desc: "",
+        options: [
+          {
+            text: "被當成什麼都不懂、什麼都不會的小孩。",
+            tag: "被小看",
+            effect: { dark: 3, emo: 6, dom: 3, soc: 0, light: 0 }
+          },
+          {
+            text: "明明很努力，卻永遠被忽略、被當空氣。",
+            tag: "被忽視",
+            effect: { dark: 5, emo: 8, dom: -2, soc: -2, light: -1 }
+          },
+          {
+            text: "被當成只會罵人、沒有溫度的控制狂。",
+            tag: "被誤會成壞人",
+            effect: { dark: 3, emo: 5, dom: 1, soc: -1, light: 1 }
+          },
+          {
+            text: "被當成永遠都很堅強，不需要被照顧的那個人。",
+            tag: "被當不會垮",
+            effect: { dark: 4, emo: 7, dom: 0, soc: 0, light: 0 }
+          }
+        ]
+      },
+      {
+        text: "你覺得真正懂你的人，會？",
+        desc: "",
+        options: [
+          {
+            text: "不用每天聊天，但一開口就可以接得上頻率。",
+            tag: "低頻高共鳴",
+            effect: { dark: 2, emo: 4, dom: 0, soc: 1, light: 3 }
+          },
+          {
+            text: "看得懂你不說的部分，也願意等你願意講為止。",
+            tag: "高共感",
+            effect: { dark: 3, emo: 7, dom: -1, soc: 1, light: 3 }
+          },
+          {
+            text: "敢在你狀態不對時直接點出來，不會只說好聽話。",
+            tag: "直言型",
+            effect: { dark: 2, emo: 3, dom: 3, soc: 1, light: 2 }
+          },
+          {
+            text: "不一定完全懂你，但願意跟你一起摸索。",
+            tag: "陪跑型",
+            effect: { dark: 0, emo: 5, dom: 0, soc: 2, light: 3 }
+          }
+        ]
+      },
+      {
+        text: "如果可以選一個世界觀當背景，你會？",
+        desc: "",
+        options: [
+          {
+            text: "魔王 / 蛇神 / 深淵神祇那一側，站在黑暗陣營。",
+            tag: "黑暗陣營",
+            effect: { dark: 7, emo: 4, dom: 5, soc: 0, light: -2 }
+          },
+          {
+            text: "人類陣營裡的普通人，卻和非人存在產生連結。",
+            tag: "人類 × 神秘存在",
+            effect: { dark: 4, emo: 6, dom: 1, soc: 1, light: 3 }
+          },
+          {
+            text: "在光明陣營，但知道光也不是真的那麼乾淨。",
+            tag: "光裡有影",
+            effect: { dark: 4, emo: 4, dom: 2, soc: 1, light: 2 }
+          },
+          {
+            text: "遊走在各個陣營之間，看故事發展再決定要站哪邊。",
+            tag: "中立觀察者",
+            effect: { dark: 3, emo: 3, dom: 2, soc: 2, light: 2 }
+          }
+        ]
+      },
+      {
+        text: "你對「溫柔」的定義最接近哪一種？",
+        desc: "",
+        options: [
+          {
+            text: "會記得你的在意點，不踩雷，也會幫你擋很多東西。",
+            tag: "實際型溫柔",
+            effect: { dark: 1, emo: 6, dom: 2, soc: 2, light: 4 }
+          },
+          {
+            text: "願意花時間聽你說完，不急著給建議或評價。",
+            tag: "傾聽型溫柔",
+            effect: { dark: 1, emo: 7, dom: -1, soc: 2, light: 4 }
+          },
+          {
+            text: "在你做錯事時也會拉住你，不是放任你墜落。",
+            tag: "帶界線的溫柔",
+            effect: { dark: 2, emo: 4, dom: 3, soc: 1, light: 3 }
+          },
+          {
+            text: "給你空間、尊重你的選擇，即使不完全認同。",
+            tag: "尊重型溫柔",
+            effect: { dark: 0, emo: 4, dom: 0, soc: 2, light: 4 }
+          }
+        ]
+      }
+    ];
 
-  // 抓元素
-  const quizApp = document.getElementById("quizApp");
-  const questionArea = document.getElementById("question-area");
-  const questionTextEl = document.getElementById("question-text");
-  const choicesEl = document.getElementById("choices");
-  const progressText = document.getElementById("progress-text");
-  const resultsEl = document.getElementById("results");
-  const barDark = document.getElementById("bar-dark");
-  const barLight = document.getElementById("bar-light");
-  const darkLabel = document.getElementById("dark-label");
-  const lightLabel = document.getElementById("light-label");
-  const innerStateEl = document.getElementById("inner-state");
-  const charListEl = document.getElementById("char-list");
-  const restartBtn = document.getElementById("restart-btn");
+    // 狀態
+    const state = {
+      idx: 0,
+      dark: 50,
+      light: 50,
+      emo: 50,
+      dom: 50,
+      soc: 50
+    };
 
-  // 代表人物元素
-  const repNameEl = document.getElementById("rep-name");
-  const repTypeEl = document.getElementById("rep-type");
-  const repMatchEl = document.getElementById("rep-match");
-  const repTaglineEl = document.getElementById("rep-tagline");
-  const repDescEl = document.getElementById("rep-desc");
+    // DOM 取用
+    const pageIntro = document.getElementById("page-intro");
+    const pageQuiz = document.getElementById("page-quiz");
+    const pageResult = document.getElementById("page-result");
 
-  function clamp(v, min, max) {
-    return Math.max(min, Math.min(max, v));
-  }
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
 
-  function renderQuestion() {
-    const q = questions[currentIndex];
-    progressText.textContent = `第 ${currentIndex + 1} / ${questions.length} 題`;
-    questionTextEl.textContent = q.text;
-    choicesEl.innerHTML = "";
+    const qProgressText = document.getElementById("qProgressText");
+    const qProgressBar = document.getElementById("qProgressBar");
+    const qText = document.getElementById("qText");
+    const qDesc = document.getElementById("qDesc");
+    const optionsEl = document.getElementById("options");
 
-    q.choices.forEach(choice => {
-      const btn = document.createElement("button");
-      btn.className = "choice-btn";
-      btn.textContent = choice.text;
-      btn.addEventListener("click", () => {
-        applyEffects(choice.effects);
-        currentIndex++;
-        if (currentIndex >= questions.length) {
-          showResults();
-        } else {
-          renderQuestion();
-        }
-      });
-      choicesEl.appendChild(btn);
+    const barDark = document.getElementById("barDark");
+    const barLight = document.getElementById("barLight");
+    const darkLabel = document.getElementById("darkLabel");
+    const lightLabel = document.getElementById("lightLabel");
+    const innerStateEl = document.getElementById("innerState");
+    const charListEl = document.getElementById("charList");
+
+    const repNameEl = document.getElementById("repName");
+    const repTypeEl = document.getElementById("repType");
+    const repMatchEl = document.getElementById("repMatch");
+    const repTaglineEl = document.getElementById("repTagline");
+    const repDescEl = document.getElementById("repDesc");
+
+    const bgm = document.getElementById("bgm");
+    const musicToggle = document.getElementById("musicToggle");
+    const musicLabel = document.getElementById("musicLabel");
+
+    musicToggle.addEventListener("click", () => {
+      if (bgm.paused) {
+        bgm.play().catch(() => {});
+        musicToggle.classList.add("playing");
+        musicLabel.textContent = "BGM 開";
+      } else {
+        bgm.pause();
+        musicToggle.classList.remove("playing");
+        musicLabel.textContent = "BGM 關";
+      }
     });
-  }
 
-  function applyEffects(effects) {
-    state.dark = clamp(state.dark + (effects.dark || 0), 0, 120);
-    state.light = clamp(state.light + (effects.light || 0), 0, 120);
-    state.emo = clamp(state.emo + (effects.emo || 0), 0, 120);
-    state.dom = clamp(state.dom + (effects.dom || 0), 0, 120);
-    state.soc = clamp(state.soc + (effects.soc || 0), 0, 120);
-  }
-
-  function getInnerStateDescription(darkPct, lightPct, emo, dom, soc) {
-    let lines = [];
-
-    if (darkPct > 65 && emo > 65) {
-      lines.push("你有很深的情緒與黑暗層次，對世界看得很清楚，也很容易被細節刺傷。你不是壞，只是比很多人更敏感、更早看到現實。");
-    } else if (darkPct > 65 && emo <= 65) {
-      lines.push("你的黑暗面比較偏理智型，不是情緒氾濫，而是對人性保持距離和懷疑。你會保護自己，不輕易把真心交出去。");
-    } else if (darkPct < 40 && lightPct > 60) {
-      lines.push("你整體偏陽光與溫柔，願意相信人，也願意給予。就算有陰影，多半選擇用溫柔的方式消化，而不是反擊。");
-    } else {
-      lines.push("你的光與暗大致平衡，你知道自己有情緒、有陰影，但也懂得往外伸手、尋找連結。你比自己以為的還穩。");
+    function showPage(page) {
+      pageIntro.classList.remove("active");
+      pageQuiz.classList.remove("active");
+      pageResult.classList.remove("active");
+      page.classList.add("active");
     }
 
-    if (dom > 70) {
-      lines.push("你在關係裡有明顯的主導特質，習慣掌控局面、替大家做決定。有時候會讓人有壓迫感，但同時也很可靠。");
-    } else if (dom < 40) {
-      lines.push("你比較不喜歡強出風頭，很多時候願意配合、讓步。你在意的是氣氛和感受，而不是誰說了算。");
-    } else {
-      lines.push("在主導與跟隨之間，你其實蠻會拿捏，很看對象與場合。你可以當領頭，也可以當溫柔的後盾。");
+    function resetState() {
+      state.idx = 0;
+      state.dark = 50;
+      state.light = 50;
+      state.emo = 50;
+      state.dom = 50;
+      state.soc = 50;
     }
 
-    if (soc > 65) {
-      lines.push("你在人群中其實有不錯的適應力，雖然不一定永遠外向，但你懂得怎麼讀氣氛、怎麼讓場面順著走。");
-    } else if (soc < 35) {
-      lines.push("你很需要自己的空間，社交對你來說有時候是一種消耗。比起熱鬧，你更珍惜少數真正懂你的人。");
-    } else {
-      lines.push("你在獨處與社交之間保持一種彈性，會挑人、挑場合，跟喜歡的人在一起可以很放鬆。");
-    }
+    function renderQuestion() {
+      const q = questions[state.idx];
+      qText.textContent = q.text;
+      qDesc.textContent = q.desc || "";
+      const total = questions.length;
+      qProgressText.textContent = `第 ${state.idx + 1} / ${total} 題`;
+      qProgressBar.style.width = ((state.idx + 1) / total) * 100 + "%";
 
-    return lines.join("\n\n");
-  }
+      optionsEl.innerHTML = "";
+      q.options.forEach((opt) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
 
-  function computeCompatibility(player, charProfile) {
-    const maxDist = 4 * 100;
-    const darkNorm = clamp(player.dark, 0, 100);
-    const emoNorm = clamp(player.emo, 0, 100);
-    const domNorm = clamp(player.dom, 0, 100);
-    const socNorm = clamp(player.soc, 0, 100);
+        const main = document.createElement("div");
+        main.className = "option-main";
+        main.textContent = opt.text;
 
-    const d =
-      Math.abs(darkNorm - charProfile.dark) +
-      Math.abs(emoNorm - charProfile.emo) +
-      Math.abs(domNorm - charProfile.dom) +
-      Math.abs(socNorm - charProfile.soc);
+        const tag = document.createElement("div");
+        tag.className = "option-tag";
+        tag.textContent = opt.tag;
 
-    let base = Math.round(100 * (1 - d / maxDist));
-    if (base < 0) base = 0;
+        btn.appendChild(main);
+        btn.appendChild(tag);
 
-    const darkGap = Math.abs(darkNorm - charProfile.dark);
-    const emoGap = Math.abs(emoNorm - charProfile.emo);
+        btn.addEventListener("click", () => {
+          applyEffect(opt.effect);
+        });
 
-    let loveBonus = 0;
-    if (darkGap <= 15) loveBonus += 8;
-    if (darkGap >= 35) loveBonus += 5;
-    if (emoGap <= 15) loveBonus += 5;
-    const love = clamp(Math.round(base * 0.7 + loveBonus), 0, 100);
-
-    return { friend: base, love };
-  }
-
-  function showResults() {
-    questionArea.style.display = "none";
-    resultsEl.style.display = "block";
-
-    const darkTotal = Math.max(state.dark, 0);
-    const lightTotal = Math.max(state.light, 0);
-    const sum = darkTotal + lightTotal || 1;
-    const darkPct = Math.round((darkTotal / sum) * 100);
-    const lightPct = 100 - darkPct;
-
-    barDark.style.width = darkPct + "%";
-    barLight.style.width = lightPct + "%";
-    darkLabel.textContent = `黑暗面 ${darkPct}%`;
-    lightLabel.textContent = `陽光面 ${lightPct}%`;
-
-    innerStateEl.textContent = getInnerStateDescription(
-      darkPct, lightPct, state.emo, state.dom, state.soc
-    );
-
-    charListEl.innerHTML = "";
-    const results = [];
-
-    for (const [name, profile] of Object.entries(characters)) {
-      const compat = computeCompatibility(state, profile);
-      results.push({
-        name,
-        mbti: profile.mbti,
-        type: profile.type,
-        friend: compat.friend,
-        love: compat.love,
-        summary: profile.summary,
-        tagline: profile.tagline,
-        detail: profile.detail
+        optionsEl.appendChild(btn);
       });
     }
 
-    // 依情侶適配度排序
-    results.sort((a, b) => b.love - a.love);
+    function applyEffect(eff) {
+      state.dark += eff.dark || 0;
+      state.light += eff.light || 0;
+      state.emo += eff.emo || 0;
+      state.dom += eff.dom || 0;
+      state.soc += eff.soc || 0;
 
-    // 代表人物 = 第一名
-    const rep = results[0];
-    repNameEl.textContent = `${rep.name}（${rep.mbti}）`;
-    repTypeEl.textContent = rep.type;
-    repMatchEl.textContent = `與你整體適配度：約 ${rep.love}%`;
-    repTaglineEl.textContent = rep.tagline || "";
-    repDescEl.textContent = rep.detail || rep.summary || "";
+      state.idx++;
+      if (state.idx >= questions.length) {
+        showResults();
+      } else {
+        renderQuestion();
+      }
+    }
 
-    // 列出全部角色
-    results.forEach(r => {
-      const card = document.createElement("div");
-      card.className = "char-card";
+    function getInnerStateDescription(darkPct, lightPct, emo, dom, soc) {
+      const parts = [];
 
-      const header = document.createElement("div");
-      header.className = "char-header";
+      if (darkPct > 65) {
+        parts.push("你的黑暗面其實不低，這並不代表你是壞人，而是你很清楚世界不只是一片光。");
+      } else if (darkPct > 40) {
+        parts.push("你同時保有黑暗和光亮，會在不同情境中切換面向，這讓你既溫柔又有底線。");
+      } else {
+        parts.push("你整體偏向光的一側，仍然知道世界不完美，但你選擇用比較溫柔的方式活著。");
+      }
 
-      const nameEl = document.createElement("div");
-      nameEl.className = "char-name";
-      nameEl.textContent = `${r.name}（${r.mbti}）`;
+      if (emo > 75) {
+        parts.push("你的情緒感受力非常高，很多人只覺得「有點不舒服」的地方，你早就察覺到了。");
+      } else if (emo > 55) {
+        parts.push("你對情緒敏感但不至於被完全淹沒，多數時候仍能在情緒與理性之間找到平衡。");
+      } else {
+        parts.push("你習慣先用理性處理事情，再回頭檢查自己的情緒，因此別人很少看到你真正的崩潰。");
+      }
 
-      const typeEl = document.createElement("div");
-      typeEl.className = "char-type";
-      typeEl.textContent = r.type;
+      if (dom > 70) {
+        parts.push("你對掌控感有一定需求，當局勢太混亂時，你會本能地想接手方向盤。");
+      } else if (dom < 35) {
+        parts.push("你不太喜歡爭奪主導權，比起當領導，你更習慣成為可靠的副手或旁邊那個清醒的人。");
+      }
 
-      header.appendChild(nameEl);
-      header.appendChild(typeEl);
-      card.appendChild(header);
+      if (soc > 70) {
+        parts.push("你在社交場合的能量不低，雖然有時會覺得累，但你確實有能力帶動氣氛。");
+      } else if (soc < 35) {
+        parts.push("你的社交電量有限，需要自己的空間與安靜時間，才能好好回到人群之中。");
+      }
 
-      const scoresEl = document.createElement("div");
-      scoresEl.className = "char-scores";
-      scoresEl.textContent = `適合相處度：約 ${r.friend}%｜成為情侶的可能性：約 ${r.love}%`;
-      card.appendChild(scoresEl);
+      return parts.join(" ");
+    }
 
-      const summaryEl = document.createElement("div");
-      summaryEl.className = "char-summary";
-      summaryEl.textContent = r.summary;
-      card.appendChild(summaryEl);
+    function computeCompatibility(user, ideal) {
+      // user / ideal: dark, emo, dom, soc; light 由 dark 推
+      const dims = ["dark", "emo", "dom", "soc"];
+      let sumDiff = 0;
 
-      charListEl.appendChild(card);
+      dims.forEach((k) => {
+        const d = Math.abs((user[k] || 0) - (ideal[k] || 0));
+        sumDiff += d;
+      });
+
+      const avgDiff = sumDiff / dims.length; // 0 ~ 100
+      let base = Math.max(0, 100 - avgDiff); // 差越小分數越高
+
+      const friend = Math.round(base);
+      // 愛情稍微偏主導＋情緒一點
+      let love = base;
+      love += (100 - Math.abs(user.dom - ideal.dom)) * 0.05;
+      love += (100 - Math.abs(user.emo - ideal.emo)) * 0.05;
+      love = clamp(Math.round(love / 1.1), 0, 100);
+
+      return { friend, love };
+    }
+
+    function showResults() {
+      showPage(pageResult);
+
+      const darkRaw = clamp(state.dark, 0, 100);
+      const lightRaw = clamp(state.light, 0, 100);
+      const total = darkRaw + lightRaw || 1;
+      const darkPct = Math.round((darkRaw / total) * 100);
+      const lightPct = 100 - darkPct;
+
+      barDark.style.width = darkPct + "%";
+      barLight.style.width = lightPct + "%";
+      darkLabel.textContent = `黑暗面 ${darkPct}%`;
+      lightLabel.textContent = `陽光面 ${lightPct}%`;
+
+      const emoNorm = clamp(state.emo, 0, 100);
+      const domNorm = clamp(state.dom, 0, 100);
+      const socNorm = clamp(state.soc, 0, 100);
+
+      innerStateEl.textContent = getInnerStateDescription(
+        darkPct,
+        lightPct,
+        emoNorm,
+        domNorm,
+        socNorm
+      );
+
+      const userVec = {
+        dark: darkPct,
+        emo: emoNorm,
+        dom: domNorm,
+        soc: socNorm
+      };
+
+      const results = characters.map((ch) => {
+        const compat = computeCompatibility(userVec, ch.ideal);
+        return {
+          ...ch,
+          friend: compat.friend,
+          love: compat.love
+        };
+      });
+
+      // 以愛情適配度排序
+      results.sort((a, b) => b.love - a.love);
+
+      const rep = results[0];
+
+      repNameEl.textContent = `${rep.name}（${rep.mbti}）`;
+      repTypeEl.textContent = rep.type;
+      repMatchEl.textContent = `與你的整體情侶適配度：約 ${rep.love}%`;
+      repTaglineEl.textContent = rep.tagline;
+      repDescEl.textContent = rep.detail || rep.summary;
+
+      charListEl.innerHTML = "";
+      results.forEach((r) => {
+        const card = document.createElement("div");
+        card.className = "char-card";
+
+        const header = document.createElement("div");
+        header.className = "char-header";
+
+        const nameEl = document.createElement("div");
+        nameEl.className = "char-name";
+        nameEl.textContent = `${r.name}（${r.mbti}）`;
+
+        const typeEl = document.createElement("div");
+        typeEl.className = "char-type";
+        typeEl.textContent = r.type;
+
+        header.appendChild(nameEl);
+        header.appendChild(typeEl);
+        card.appendChild(header);
+
+        const scoresEl = document.createElement("div");
+        scoresEl.className = "char-scores";
+        scoresEl.textContent =
+          `適合相處度：約 ${r.friend}% ｜ 情侶適配度：約 ${r.love}%`;
+        card.appendChild(scoresEl);
+
+        const summaryEl = document.createElement("div");
+        summaryEl.className = "char-summary";
+        summaryEl.textContent = r.summary;
+        card.appendChild(summaryEl);
+
+        charListEl.appendChild(card);
+      });
+    }
+
+    startBtn.addEventListener("click", () => {
+      resetState();
+      showPage(pageQuiz);
+      renderQuestion();
     });
-  }
 
-  function resetQuiz() {
-    state = { ...initialState };
-    currentIndex = 0;
-    resultsEl.style.display = "none";
-    questionArea.style.display = "block";
-    renderQuestion();
-  }
-
-  // 給開頭那個「開始測驗」呼叫
-  function loadQuiz() {
-    quizApp.style.display = "flex";
-    resetQuiz();
-  }
-
-  restartBtn.addEventListener("click", () => {
-    resetQuiz();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-</script>
+    restartBtn.addEventListener("click", () => {
+      resetState();
+      showPage(pageQuiz);
+      renderQuestion();
+    });
+  </script>
 </body>
 </html>
